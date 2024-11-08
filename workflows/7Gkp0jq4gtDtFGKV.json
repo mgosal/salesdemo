@@ -1,0 +1,418 @@
+{
+  "id": "7Gkp0jq4gtDtFGKV",
+  "name": "Get Company Info",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "![h](https://i.postimg.cc/KcBH6spq/Screenshot-2024-08-20-at-19-40-25.png#full-width)",
+        "height": 677.0358687053997,
+        "width": 1163.3132111854613,
+        "color": 7
+      },
+      "id": "dc836381-aac6-48d7-bb87-8af3db2f0beb",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2400,
+        500
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![h](https://i.postimg.cc/52CgzHcP/Screenshot-2024-08-20-at-19-40-47.png#full-width)",
+        "height": 677.0358687053997,
+        "width": 1163.3132111854616,
+        "color": 7
+      },
+      "id": "394f0848-6013-4b7c-a7b0-e9c533f11a2b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1260,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![h](https://i.postimg.cc/T3J90zwm/Screenshot-2024-08-20-at-19-41-33.png#full-width)",
+        "height": 677.0358687053997,
+        "width": 1163.3132111854616,
+        "color": 7
+      },
+      "id": "b0466595-9d30-49e6-8d6b-c6dc2b679aff",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2400,
+        1300
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "action": "added",
+        "object": "organization"
+      },
+      "id": "da001e69-5b24-4d91-a9ba-2f3600ad0479",
+      "name": "Pipedrive Trigger - An Organization is created",
+      "type": "n8n-nodes-base.pipedriveTrigger",
+      "position": [
+        -660,
+        1380
+      ],
+      "webhookId": "da5108cc-d8b6-40ea-aacf-c3a005e5bd9f",
+      "typeVersion": 1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "https://app.scrapingbee.com/api/v1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "KKUCGGMCNQWC8WMOD8FG8S3NCQPEFKYNEORKITG65K2ML47ITJ3V2DVDIS1QLHMXJ8XA1UQYZFRNXUR5"
+            },
+            {
+              "name": "url",
+              "value": "={{ $json.website }}"
+            },
+            {
+              "name": "render_js",
+              "value": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f9da0cf0-c268-4e14-8dea-a6196f7994db",
+      "name": "Scrapingbee - Get Organization's URL content",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -300,
+        1640
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U05Q6U1EKNW",
+          "mode": "list",
+          "cachedResultName": "liam.mulligan"
+        },
+        "text": "=\n\n\n {{ $json.slackFormattedMarkdown }}",
+        "otherOptions": {}
+      },
+      "id": "edc782ce-98ba-4c20-924e-a17fa05cdb5b",
+      "name": "Slack - Notify ",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        740,
+        1500
+      ],
+      "typeVersion": 2.2,
+      "webhookId": "dec8c209-5423-4805-9e13-d585ced24362",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "JuwKH1V4ooEqR7eI",
+          "name": "Liam Slack account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "id": "ef2679a1-06d5-4c8c-b3bc-9f12de3ceb4c",
+      "name": "HTML To Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "position": [
+        200,
+        1640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "{\n[\n    {\n      \"parameters\": {\n        \"functionCode\": \"const markdown = require('markdown-it')();\\n\\n// Your input Markdown text\\nconst inputMarkdown = items[0].json.markdown;\\n\\n// Convert Markdown to HTML\\nlet html = markdown.render(inputMarkdown);\\n\\n// Slack-specific conversions\\nhtml = html.replace(/<em>(.*?)<\\\\/em>/g, '*$1*'); // Convert italics\\nhtml = html.replace(/<strong>(.*?)<\\\\/strong>/g, '*$1*'); // Convert bold\\nhtml = html.replace(/<code>(.*?)<\\\\/code>/g, '`$1`'); // Convert inline code\\nhtml = html.replace(/<pre><code>(.*?)<\\\\/code><\\\\/pre>/gs, '```\\n$1\\n```'); // Convert code blocks\\nhtml = html.replace(/<a href=\\\"(.*?)\\\">(.*?)<\\\\/a>/g, '<$1|$2>'); // Convert links\\nhtml = html.replace(/<ul>(.*?)<\\\\/ul>/gs, (_, content) => content.replace(/<li>(.*?)<\\\\/li>/g, '• $1')); // Convert bullet lists\\nhtml = html.replace(/<ol>(.*?)<\\\\/ol>/gs, (_, content) => content.replace(/<li>(.*?)<\\\\/li>/g, (match, p1, index) => `${index + 1}. ${p1}`)); // Convert numbered lists\\n\\n// Return converted Slack Markdown\\nreturn [{ json: { slackMarkdown: html.trim() } }];\"\n      },\n      \"name\": \"Markdown to Slack Markdown\",\n      \"type\": \"n8n-nodes-base.function\",\n      \"typeVersion\": 1,\n      \"position\": [\n        450,\n        300\n      ]\n    }\n  ]\n}\n"
+      },
+      "id": "744cef95-e98f-4e26-b74b-5204496e8d5c",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        2020
+      ]
+    },
+    {
+      "parameters": {
+        "pageId": {
+          "__rl": true,
+          "value": "https://www.notion.so/n8n/Company-Overviews-218042eae6d34822a6550fcfcba2b673",
+          "mode": "url"
+        },
+        "title": "=Company info on  {{ $('Pipedrive Trigger - An Organization is created').item.json.name }}",
+        "blockUi": {
+          "blockValues": [
+            {
+              "textContent": "={{ $json.notionFormattedMarkdown }}"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd8895be-fdd1-4dde-9ef2-f20ffb43252a",
+      "name": "Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        760,
+        1820
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputMarkdown = items[0].json.data;\n\nfunction convertMarkdownToSlackFormat(markdown) {\n    let slackFormatted = markdown;\n    \n    // Convert headers\n    slackFormatted = slackFormatted.replace(/^# (.*$)/gim, '*$1*');\n    slackFormatted = slackFormatted.replace(/^## (.*$)/gim, '*$1*');\n    \n    // Convert unordered lists\n    slackFormatted = slackFormatted.replace(/^\\* (.*$)/gim, '➡️ $1');\n    \n    // Convert tables\n    const tableRegex = /\\n\\|.*\\|\\n\\|.*\\|\\n((\\|.*\\|\\n)+)/;\n    const tableMatch = slackFormatted.match(tableRegex);\n    if (tableMatch) {\n        const table = tableMatch[0];\n        const rows = table.split('\\n').slice(3, -1);\n        const formattedRows = rows.map(row => {\n            const columns = row.split('|').slice(1, -1).map(col => col.trim());\n            return `*${columns[0]}*: ${columns[1]}`;\n        }).join('\\n');\n        slackFormatted = slackFormatted.replace(table, formattedRows);\n    }\n    \n    return slackFormatted;\n}\n\nconst slackMarkdown = convertMarkdownToSlackFormat(inputMarkdown);\nconsole.log(slackMarkdown);\n\n// Return data\nreturn [{ slackFormattedMarkdown: slackMarkdown }];\n"
+      },
+      "id": "9a484eca-fc3c-4233-9492-9ec1e9d05b13",
+      "name": "Code - Markdown to Slack Markdown1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        480,
+        1640
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputHTML = items[0].json.data;\n\nfunction convertHTMLToNotionFormat(html) {\n    let NotionFormatted = html;\n    \n    // Convert bold text\n    NotionFormatted = NotionFormatted.replace(/<b>(.*?)<\\/b>/gim, '*$1*');\n    // Convert italic text\n    NotionFormatted = NotionFormatted.replace(/<i>(.*?)<\\/i>/gim, '_$1_');\n    // Convert headers\n    NotionFormatted = NotionFormatted.replace(/<h1>(.*?)<\\/h1>/gim, '# $1');\n    NotionFormatted = NotionFormatted.replace(/<h2>(.*?)<\\/h2>/gim, '## $1');\n    // Convert unordered lists\n    NotionFormatted = NotionFormatted.replace(/<li>(.*?)<\\/li>/gim, '➡️ $1');\n    // Convert tables\n    const tableRegex = /<table>(.*?)<\\/table>/gims;\n    const tableMatch = NotionFormatted.match(tableRegex);\n    if (tableMatch) {\n        const table = tableMatch[0];\n        const rows = table.split('<tr>').slice(1);\n        const formattedRows = rows.map(row => {\n            const columns = row.split('<td>').slice(1).map(col => col.replace(/<\\/td>/, '').trim());\n            return `*${columns[0]}*: ${columns[1]}`;\n        }).join('\\n');\n        NotionFormatted = NotionFormatted.replace(table, formattedRows);\n    }\n    return NotionFormatted;\n}\n\nconst notionMarkdown = convertHTMLToNotionFormat(inputHTML);\nconsole.log(notionMarkdown);\n\n// Return data\nreturn [{ notionFormattedMarkdown: notionMarkdown }];"
+      },
+      "id": "76dca699-87dc-4a76-b26f-7e49d8906cda",
+      "name": "Code - Markdown to Notion Markdown",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        480,
+        1820
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "![h](https://i.postimg.cc/WbLsnKcv/Screenshot-2024-08-21-at-17-40-49.png#full-width)",
+        "height": 677.0358687053997,
+        "width": 1163.3132111854616,
+        "color": 7
+      },
+      "id": "85f77673-20f0-4857-82bb-6f201436a569",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1260,
+        1340
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n# [Chat Bot Workflow](https://internal.users.n8n.cloud/workflow/UYSGd0Ukkr1OYpMf)\n",
+        "height": 139.90779425688197,
+        "width": 206.71926192158114
+      },
+      "id": "02d221bf-fe21-462f-94e1-ad32da59eec4",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2460,
+        1680
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.data }}"
+            },
+            {
+              "content": "You're an assistant that summarizes website content for CRM entries. The user will provide HTML content from a company's website. Your task is to analyze the HTML content and create a concise summary that includes:\n\n1. A brief description of the company's services or products.\n2. Any information about the company's target market or customer base.\n3. Key points about the company's unique selling propositions or competitive advantages.\n4. Based on the provided information, suggest potential competitors if you know any.\n\nFormat your response as HTML.\n\nExample response :\n\n    <h1>Company Description</h1>\n    <p>Company1 specializes in services related to electric vehicles. The company focuses on providing resources and information about electric car chargers, battery life, different car brands, and the environmental impact of electric vehicles.</p>\n\n    <h2>Target Market</h2>\n    <p>The target market for Company1 includes electric vehicle owners and potential buyers who are interested in making the shift from traditional fossil fuel vehicles to electric cars. The company also targets environmentally conscious consumers who are looking for sustainable mobility solutions.</p>\n\n    <h2>Unique Selling Propositions</h2>\n    <ul>\n        <li>Comprehensive information about electric vehicle charging solutions, including how to install home charging stations.</li>\n        <li>Detailed articles on the advantages of electric vehicles such as ecology and reliability.</li>\n        <li>Educational resources on the autonomy and battery life of different electric car models.</li>\n        <li>Insights into premier electric vehicle brands.</li>\n    </ul>\n\n    <h2>Potential Competitors</h2>\n    <table border=\"1\">\n        <tr>\n            <th>Competitor Name</th>\n            <th>Website</th>\n        </tr>\n        <tr>\n            <td>Competitor1</td>\n            <td><a href=\"https://www.example1.com\">https://www.example1.com</a></td>\n        </tr>\n        <tr>\n            <td>Competitor2</td>\n            <td><a href=\"https://www.example2.com\">https://www.example2.com</a></td>\n        </tr>\n        <tr>\n            <td>Competitor3</td>\n            <td><a href=\"https://www.example3.com\">https://www.example3.com</a></td>\n        </tr>\n        <tr>\n            <td>Competitor4</td>\n            <td><a href=\"https://www.example4.com\">https://www.example4.com</a></td>\n        </tr>\n    </table>\n",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dce48390-65e0-4216-a0dc-889ed73816c5",
+      "name": "OpenAI - Message GPT-4o with Scraped Data",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -140,
+        1640
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "content": "## Triggers\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/sticky-notes/)",
+        "height": 952.0667181001113,
+        "width": 380.13488089463476
+      },
+      "id": "e2557b81-02ae-43a3-b640-e20a8e14d605",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        1260
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Sales Research",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Company name"
+            },
+            {
+              "fieldLabel": "Domain"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "ef728033-dd88-4f09-a7b5-53fd7dcefdee",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -660,
+        1620
+      ],
+      "webhookId": "86d1c98e-a4fb-4567-a03a-c534f43fd138"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -660,
+        1840
+      ],
+      "id": "09f9f756-0713-4fb3-a0be-3d61a7cf8b4b",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "6579b4e1-9e5d-47c1-8950-3f4ee0274347",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        2060
+      ]
+    }
+  ],
+  "connections": {
+    "Scrapingbee - Get Organization's URL content": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Message GPT-4o with Scraped Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML To Markdown": {
+      "main": [
+        [
+          {
+            "node": "Code - Markdown to Notion Markdown",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code - Markdown to Slack Markdown1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Markdown to Slack Markdown1": {
+      "main": [
+        [
+          {
+            "node": "Slack - Notify ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Message GPT-4o with Scraped Data": {
+      "main": [
+        [
+          {
+            "node": "HTML To Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Scrapingbee - Get Organization's URL content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "triggerCount": 0,
+  "versionId": "1d4dd354-4f48-458d-802c-ed0e4442723e",
+  "owner": {
+    "type": "team",
+    "teamId": "cGpjtU9izkfBVNL2",
+    "teamName": "Enterprise Demo Space"
+  }
+}

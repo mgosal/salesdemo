@@ -1,0 +1,11 @@
+{
+  "id": "JuwKH1V4ooEqR7eI",
+  "name": "Liam Slack account",
+  "type": "slackOAuth2Api",
+  "data": {},
+  "ownedBy": {
+    "type": "team",
+    "teamId": "cGpjtU9izkfBVNL2",
+    "teamName": "Enterprise Demo Space"
+  }
+}
